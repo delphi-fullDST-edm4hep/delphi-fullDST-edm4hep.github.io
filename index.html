@@ -43,6 +43,19 @@
  .note { border-left:3px solid var(--green); padding:3px 0 3px 15px; color:var(--soft); font-size:15px; }
  footer { margin-top:46px; padding-top:20px; border-top:1px solid var(--line);
           color:var(--soft); font-size:14px; }
+ .live { border:1px solid var(--line); border-radius:10px; background:var(--card); overflow:hidden; margin-bottom:10px; }
+ .live .bar { display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+              padding:10px 14px; border-bottom:1px solid var(--line); font-size:13.5px; }
+ .live .bar b { font-size:14.5px; } .live .bar .s { color:var(--soft); flex:1; min-width:120px; }
+ .live .bar a { font:12.5px "IBM Plex Mono",Menlo,monospace; text-decoration:none;
+                padding:4px 10px; border:1px solid var(--line); border-radius:6px; white-space:nowrap; }
+ .live .bar a:hover { border-color:var(--navy); background:rgba(26,68,128,.07); }
+ .live .stage { position:relative; background:#fff; }
+ .live iframe { display:block; width:100%; height:620px; border:0; background:#fff; }
+ .live .plot { width:100%; height:580px; }
+ .live .ph { display:flex; align-items:center; justify-content:center; height:280px;
+             color:var(--soft); font:13px "IBM Plex Mono",Menlo,monospace; text-align:center; padding:20px; }
+ .cap { color:var(--soft); font-size:14px; margin:0 0 26px; }
 </style></head><body><div class="wrap">
 
 <header>
@@ -71,6 +84,35 @@ reconstruction chain, to EDM4hep files you can analyse and look at today.</p>
                      │
                      ▼
               event display</pre>
+
+<h2>An event, live</h2>
+<div class="live">
+  <div class="bar">
+    <b>DELPHI run 48758, event 2666</b>
+    <span class="s">drag to rotate · scroll to zoom · hover a track</span>
+    <a href="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep-eventdisplay/app.html">Open the display →</a>
+  </div>
+  <div class="stage"><div id="evt" class="plot"><div class="ph">the figure loads when you scroll here…</div></div></div>
+</div>
+<p class="cap">A real event from 1994 data, drawn straight from its EDM4hep file — Z → bb̄ with a displaced
+φ → K⁺K⁻. This is the 3-D scene; the display also draws the four-panel view, and opens any EDM4hep file
+you drop on it.</p>
+
+<h2>The collections, live</h2>
+<div class="live">
+  <div class="bar">
+    <b>EDM4hep collection map</b>
+    <span class="s">click a collection to see its links, type and provenance</span>
+    <a href="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep/collection_map.html">Open full size →</a>
+  </div>
+  <div class="stage">
+    <iframe id="map" title="DELPHI EDM4hep collection map" loading="lazy"
+            data-src="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep/collection_map.html"></iframe>
+  </div>
+</div>
+<p class="cap">Every collection the converter writes, with its domain, type, provenance and the links between
+them. The event display reads the same vocabulary, and lists each collection's per-event object count beside
+the figure.</p>
 
 <h2>Projects</h2>
 <div class="cards">
@@ -141,4 +183,50 @@ DELPHI material without an explicit licence can be reused without limits.</p>
   · Built from
   <a href="https://github.com/delphi-fullDST-edm4hep/delphi-fullDST-edm4hep.github.io">delphi-fullDST-edm4hep.github.io</a>
 </footer>
-</div></body></html>
+</div>
+<script>
+(function () {
+  // Both embeds load only when scrolled into view: plotly.js and a figure are a lot to
+  // put on a landing page that most visitors will scroll straight past.
+  var once = function (el, fn) {
+    if (!('IntersectionObserver' in window)) { fn(); return; }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { io.disconnect(); fn(); } });
+    }, { rootMargin: '300px' });
+    io.observe(el);
+  };
+
+  var frame = document.getElementById('map');
+  once(frame, function () { frame.src = frame.dataset.src; });
+
+  var host = document.getElementById('evt');
+  var FIG = 'https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep-eventdisplay/events/data_48758_2666.3d.json';
+  function script(src) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement('script');
+      s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+    });
+  }
+  once(host, function () {
+    host.querySelector('.ph').textContent = 'loading the event…';
+    script('https://cdn.plot.ly/plotly-2.35.2.min.js')
+      .then(function () { return fetch(FIG).then(function (r) { return r.json(); }); })
+      .then(function (fig) {
+        var layout = Object.assign({}, fig.layout);
+        delete layout.width; delete layout.height;          // let it fill the card instead
+        layout.autosize = true;
+        layout.margin = { l: 0, r: 0, t: 8, b: 4 };
+        layout.showlegend = false;                           // the legend belongs in the full display
+        host.innerHTML = '';
+        return Plotly.newPlot(host, fig.data, layout,
+          { responsive: true, displaylogo: false, scrollZoom: false,
+            modeBarButtonsToRemove: ['select2d', 'lasso2d'] });
+      })
+      .catch(function () {
+        host.innerHTML = '<div class="ph">The interactive figure could not load here — ' +
+          '<a href="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep-eventdisplay/app.html">open the display</a>.</div>';
+      });
+  });
+})();
+</script>
+</body></html>
