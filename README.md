@@ -24,6 +24,10 @@ The project sites keep their own subpaths and are unaffected:
 | `/delphi-edm4hep/` | converter documentation |
 | `/delphi-edm4hep-eventdisplay/` | the event display and its manual |
 
+The chain figure is hand-authored inline SVG — no library, no image file. It is themed with
+`currentColor` and the page's `--green` variable, so it follows light and dark mode with the rest
+of the page, and carries `role="img"` with an `aria-label` stating the same claim as the caption.
+
 When a project is added or renamed, update `index.html` here and the organisation profile in
 [`.github/profile/README.md`](https://github.com/delphi-fullDST-edm4hep/.github/blob/main/profile/README.md);
 they carry the same copy.
