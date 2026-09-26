@@ -1,0 +1,144 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>DELPHI → EDM4hep</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Connecting DELPHI's legacy data formats to a modern, reproducible HEP analysis stack: simulation pipeline, EDM4hep converter, and event display.">
+<link rel="icon" href="logo.png">
+<style>
+ :root { --ink:#191c20; --soft:#5c636e; --navy:#1a4480; --line:rgba(25,28,32,.14);
+         --green:#4c9a6a; --card:#fff; --bg:#fcfcfb; }
+ @media (prefers-color-scheme: dark) {
+   :root { --ink:#e7e9ec; --soft:#a2a9b4; --navy:#93b4e8; --line:rgba(231,233,236,.16);
+           --green:#7ec49b; --card:#1a1d21; --bg:#131619; }
+ }
+ * { box-sizing:border-box; }
+ body { margin:0; font:16px/1.65 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+        color:var(--ink); background:var(--bg); }
+ .wrap { max-width:880px; margin:0 auto; padding:56px 22px 80px; }
+ header { display:flex; align-items:center; gap:20px; margin-bottom:10px; flex-wrap:wrap; }
+ header img { width:82px; height:82px; object-fit:contain; flex:none; }
+ h1 { font:700 33px/1.18 "TeX Gyre Heros",Helvetica,Arial,sans-serif; margin:0; }
+ h1 span { color:var(--navy); }
+ .lede { color:var(--soft); font-size:17px; margin:0 0 30px; max-width:62ch; }
+ h2 { font:600 12px "IBM Plex Mono",Menlo,monospace; letter-spacing:.11em; text-transform:uppercase;
+      color:var(--navy); margin:40px 0 12px; }
+ a { color:var(--navy); }
+ pre.flow { background:var(--card); border:1px solid var(--line); border-radius:8px;
+            padding:18px 20px; overflow-x:auto; font:13px/1.55 "IBM Plex Mono",Menlo,monospace;
+            color:var(--soft); margin:0 0 8px; }
+ .cards { display:grid; gap:16px; }
+ .card { border:1px solid var(--line); border-radius:10px; padding:20px 22px; background:var(--card); }
+ .card h3 { margin:0 0 3px; font-size:19px; }
+ .card h3 a { text-decoration:none; }
+ .card .kicker { font:600 11px "IBM Plex Mono",Menlo,monospace; letter-spacing:.09em;
+                 text-transform:uppercase; color:var(--green); margin:0 0 9px; }
+ .card p { margin:0 0 11px; font-size:15px; }
+ .card .when { color:var(--soft); font-size:14px; }
+ .links { display:flex; gap:8px; flex-wrap:wrap; margin-top:13px; }
+ .links a { display:inline-block; padding:5px 12px; border:1px solid var(--line); border-radius:6px;
+            text-decoration:none; font:12.5px "IBM Plex Mono",Menlo,monospace; }
+ .links a:hover { border-color:var(--navy); background:rgba(26,68,128,.07); }
+ .links a.primary { background:var(--navy); border-color:var(--navy); color:#fff; }
+ code { font-family:"IBM Plex Mono",Menlo,monospace; font-size:13.5px;
+        background:rgba(127,127,127,.13); padding:1px 5px; border-radius:3px; }
+ .note { border-left:3px solid var(--green); padding:3px 0 3px 15px; color:var(--soft); font-size:15px; }
+ footer { margin-top:46px; padding-top:20px; border-top:1px solid var(--line);
+          color:var(--soft); font-size:14px; }
+</style></head><body><div class="wrap">
+
+<header>
+  <img src="logo.png" alt="DELPHI + EDM4hep">
+  <h1>DELPHI <span>→ EDM4hep</span></h1>
+</header>
+<p class="lede">Connecting the DELPHI experiment's legacy data formats to a modern, reproducible
+HEP analysis stack — from modern event generators, through the original LEP simulation and
+reconstruction chain, to EDM4hep files you can analyse and look at today.</p>
+
+<h2>The chain</h2>
+<pre class="flow">modern event generators
+          │
+          ▼
+      HepMC3 / LUJETS
+          │
+          ▼
+   DELSIM + DELANA ────── preserved DELPHI data
+          │                         │
+          └──────────┬──────────────┘
+                     ▼
+              shortDST + fullDST
+                     │
+                     ▼
+                   EDM4hep
+                     │
+                     ▼
+              event display</pre>
+
+<h2>Projects</h2>
+<div class="cards">
+
+  <div class="card">
+    <p class="kicker">Simulation</p>
+    <h3><a href="https://github.com/delphi-fullDST-edm4hep/delphi-sim-pipeline">delphi-sim-pipeline</a></h3>
+    <p>Plugs <b>any</b> modern event generator into the DELPHI detector simulation. The
+    generator-agnostic <code>hepmc2fadgen</code> turns a HepMC3 record into the Fortran-unformatted
+    LUJETS dump (<code>fort.26</code>) that DELSIM reads; DELSIM and DELANA then produce standard
+    shortDST and fullDST. Pythia 8, Sherpa, Herwig 7, Whizard, KKMCee and external HepMC3 are wired
+    in, with container and HTCondor tooling and reproducible seeding.</p>
+    <p class="when"><b>Use it when</b> you want to generate new Monte Carlo events and push them
+    through the real DELPHI simulation and reconstruction.</p>
+    <div class="links"><a href="https://github.com/delphi-fullDST-edm4hep/delphi-sim-pipeline">Repository</a></div>
+  </div>
+
+  <div class="card">
+    <p class="kicker">Conversion</p>
+    <h3><a href="https://github.com/delphi-fullDST-edm4hep/delphi-edm4hep">delphi-edm4hep</a></h3>
+    <p>Converts DELPHI ZEBRA reconstruction data into podio/EDM4hep. A two-pass C++ pipeline writes
+    shortDST content as <code>sDST_*</code> collections, then matches the fullDST events and adds
+    detailed <code>fDST_*</code> collections — reconstructed particles, track states and covariance,
+    vertices and beamspot, calorimetry, particle identification, generator truth and reco-to-truth
+    links.</p>
+    <p class="when"><b>Use it when</b> you have DELPHI shortDST/fullDST data or simulation and want
+    an analysis-ready EDM4hep representation with documented collection meanings and units.</p>
+    <div class="links">
+      <a class="primary" href="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep/">Documentation</a>
+      <a href="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep/collection_map.html">Collection map</a>
+      <a href="https://github.com/delphi-fullDST-edm4hep/delphi-edm4hep">Repository</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="kicker">Visualisation</p>
+    <h3><a href="https://github.com/delphi-fullDST-edm4hep/delphi-edm4hep-eventdisplay">delphi-edm4hep-eventdisplay</a></h3>
+    <p>Draws a DELPHI event straight from an EDM4hep file — no DELGRA, no X11, no ROOT. Four panels
+    (r-φ, r-z, the vertex detector, RICH Cherenkov angle against momentum) or a 3-D detector scene.
+    Collections are discovered from podio metadata rather than assumed, and every one in the event
+    is listed beside the figure with its type, domain, provenance, links and object count. It runs
+    in the browser: drop a file on the page and uproot reads it locally under Pyodide — nothing is
+    uploaded.</p>
+    <p class="when"><b>Use it when</b> you want to look at a single converted event, see what a
+    collection really holds, or make a figure for a talk.</p>
+    <div class="links">
+      <a class="primary" href="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep-eventdisplay/">Open the display</a>
+      <a href="https://delphi-fulldst-edm4hep.github.io/delphi-edm4hep-eventdisplay/manual/">Documentation</a>
+      <a href="https://github.com/delphi-fullDST-edm4hep/delphi-edm4hep-eventdisplay">Repository</a>
+    </div>
+  </div>
+
+</div>
+
+<h2>Get involved</h2>
+<p>Start with the README and documentation in each repository. Bug reports, focused feature
+requests, documentation improvements and reproducible validation results are all welcome through
+GitHub issues and pull requests. Please read the
+<a href="https://github.com/delphi-fullDST-edm4hep/.github/blob/main/CONTRIBUTING.md">contribution guide</a>
+first, and see <a href="https://github.com/delphi-fullDST-edm4hep/.github/blob/main/SUPPORT.md">support</a>
+for where to file what.</p>
+
+<p class="note">Each repository documents its own licensing. Do not assume that code or legacy
+DELPHI material without an explicit licence can be reused without limits.</p>
+
+<footer>
+  <a href="https://github.com/delphi-fullDST-edm4hep">github.com/delphi-fullDST-edm4hep</a>
+  · Built from
+  <a href="https://github.com/delphi-fullDST-edm4hep/delphi-fullDST-edm4hep.github.io">delphi-fullDST-edm4hep.github.io</a>
+</footer>
+</div></body></html>
