@@ -28,6 +28,11 @@ The chain figure is hand-authored inline SVG — no library, no image file. It i
 `currentColor` and the page's `--green` variable, so it follows light and dark mode with the rest
 of the page, and carries `role="img"` with an `aria-label` stating the same claim as the caption.
 
+Every box and labelled arrow in it is an `<a>` pointing at the code or documentation for that
+stage — `generators/`, `hepmc2fadgen.cpp`, `run_generic.sh`, the converter's two-pass source, the
+collection map, `read.py`, the display. Note that **delphi-edm4hep's default branch is `dev`**, not
+`main`; a `/tree/main/` link into it 404s.
+
 When a project is added or renamed, update `index.html` here and the organisation profile in
 [`.github/profile/README.md`](https://github.com/delphi-fullDST-edm4hep/.github/blob/main/profile/README.md);
 they carry the same copy.
